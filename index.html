@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Weekly Plan">
+<title>Weekly Plan</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --green: #b8f0a0;
+    --green-bg: rgba(184,240,160,0.08);
+    --green-border: rgba(184,240,160,0.2);
+    --blue: #a0c8f0;
+    --blue-bg: rgba(160,200,240,0.08);
+    --blue-border: rgba(160,200,240,0.2);
+    --amber: #f0d0a0;
+    --amber-bg: rgba(240,208,160,0.08);
+    --amber-border: rgba(240,208,160,0.2);
+    --pink: #f0a0c0;
+    --pink-bg: rgba(240,160,192,0.08);
+    --pink-border: rgba(240,160,192,0.2);
+    --purple: #c0a0f0;
+    --purple-bg: rgba(192,160,240,0.08);
+    --purple-border: rgba(192,160,240,0.2);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 calc(80px + var(--safe-bottom)) 0;
+  }
+
+  /* Header */
+  .header {
+    padding: calc(var(--safe-top) + 20px) 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .app-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .week-streak {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .streak-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+  }
+  .streak-dot.active { background: var(--green); }
+
+  /* Day tabs */
+  .day-tabs {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    background: none;
+    color: var(--text3);
+  }
+
+  .day-tab .tab-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .day-tab .tab-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.15s;
+  }
+
+  .day-tab.has-gym .tab-dot { background: var(--blue); opacity: 0.5; }
+  .day-tab.today { color: var(--text2); }
+  .day-tab.today .tab-label { color: var(--text); }
+  .day-tab.active {
+    background: var(--surface);
+    border-color: var(--border2);
+    color: var(--text);
+  }
+  .day-tab.active.has-gym .tab-dot { opacity: 1; }
+
+  /* Progress */
+  .progress-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .progress-day {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .progress-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Content */
+  .content { padding: 16px 20px 0; }
+
+  /* Gym block */
+  .gym-card {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+
+  .gym-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .gym-card-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+  }
+
+  .gym-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--blue);
+    background: rgba(160,200,240,0.12);
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+
+  .gym-exercise {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .gym-exercise:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .gym-ex-name {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .gym-ex-sets {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  /* Habit row */
+  .habit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .habit-row:active { transform: scale(0.985); }
+
+  .habit-row.done {
+    border-color: var(--green-border);
+    background: var(--green-bg);
+  }
+
+  .habit-row.done .habit-label {
+    color: var(--text2);
+    text-decoration: line-through;
+    text-decoration-color: var(--text3);
+  }
+
+  .check-box {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .habit-row.done .check-box {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .check-icon {
+    width: 10px; height: 10px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .habit-row.done .check-icon { opacity: 1; }
+
+  .habit-label {
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+
+  .habit-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    flex-shrink: 0;
+  }
+
+  .tag-food { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .tag-skin { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+  .tag-hair { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
+  .tag-rest { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .tag-gym  { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+
+  /* Note */
+  .day-note {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border-left: 2px solid var(--green-border);
+    background: var(--green-bg);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 20px calc(var(--safe-bottom) + 12px);
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .reset-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: none;
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .reset-btn:active { transform: scale(0.97); background: var(--surface); }
+
+  .week-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .week-btn:active { transform: scale(0.97); }
+
+  /* Week overview modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 20px 20px calc(var(--safe-bottom) + 20px);
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--border2);
+    border-radius: 99px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    margin-bottom: 16px;
+  }
+  .week-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .week-row:last-child { border-bottom: none; }
+  .week-row-day { font-size: 14px; color: var(--text); }
+  .week-row-gym { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--blue); margin-left: 8px; }
+  .week-row-bar {
+    flex: 1;
+    margin: 0 16px;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .week-row-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+  }
+  .week-row-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+    min-width: 32px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <span class="app-title">Weekly Plan</span>
+      <div class="week-streak" id="streakDots"></div>
+    </div>
+    <div class="day-tabs" id="dayTabs"></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-row">
+      <span class="progress-day" id="dayName">Monday</span>
+      <span class="progress-count" id="progressCount">0 / 0</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="content" id="content"></div>
+
+</div>
+
+<div class="bottom-nav">
+  <button class="reset-btn" onclick="resetDay()">Reset day</button>
+  <button class="week-btn" onclick="openWeekModal()">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0.5" y="0.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="4.5" y="0.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="8.5" y="0.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="0.5" y="4.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="4.5" y="4.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="8.5" y="4.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="0.5" y="8.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+      <rect x="4.5" y="8.5" width="3" height="3" rx="0.5" stroke="currentColor"/>
+    </svg>
+    Week overview
+  </button>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeWeekModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">This week</div>
+    <div id="weekModalContent"></div>
+  </div>
+</div>
+
+<script>
+const DAYS = [
+  {
+    label: 'Mon', name: 'Monday', gymDay: true, gymType: 'Push',
+    gym: [
+      { ex: 'Dumbbell bench press', sets: '3×8–10' },
+      { ex: 'Overhead press', sets: '3×8–10' },
+      { ex: 'Cable / DB flyes', sets: '3×12' },
+      { ex: 'Lateral raises', sets: '3×12–15' },
+      { ex: 'Tricep pushdown', sets: '3×12' }
+    ],
+    habits: [
+      { label: 'Gym session completed', tag: 'gym' },
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: '35–40 min walk home', tag: 'rest' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Tue', name: 'Tuesday', gymDay: true, gymType: 'Pull',
+    gym: [
+      { ex: 'Dumbbell rows', sets: '3×8–10' },
+      { ex: 'Lat pulldown / assisted pull-up', sets: '3×8–10' },
+      { ex: 'Seated cable row', sets: '3×10–12' },
+      { ex: 'Rear delt flyes', sets: '3×12' },
+      { ex: 'Hammer curls', sets: '3×12' }
+    ],
+    habits: [
+      { label: 'Gym session completed', tag: 'gym' },
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: '35–40 min walk home', tag: 'rest' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Wed', name: 'Wednesday', gymDay: false,
+    note: 'Active rest day. Walk home counts as movement. Good day to prep meals for tomorrow.',
+    habits: [
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Adapalene applied (2–3× per week)', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: '35–40 min walk home', tag: 'rest' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Thu', name: 'Thursday', gymDay: true, gymType: 'Legs',
+    gym: [
+      { ex: 'Goblet squat / leg press', sets: '3×10–12' },
+      { ex: 'Romanian deadlift', sets: '3×10' },
+      { ex: 'Leg curl', sets: '3×12' },
+      { ex: 'Calf raises', sets: '3×15' },
+      { ex: 'Plank hold', sets: '3×30–45 sec' }
+    ],
+    habits: [
+      { label: 'Gym session completed', tag: 'gym' },
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: 'T/Gel shampoo wash (2× this week)', tag: 'hair' },
+      { label: '35–40 min walk home', tag: 'rest' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Fri', name: 'Friday', gymDay: false,
+    note: 'Active rest day. Last walk of the week. Good time to reflect on what slipped and adjust.',
+    habits: [
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Adapalene applied (2–3× per week)', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: '35–40 min walk home', tag: 'rest' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Sat', name: 'Saturday', gymDay: false,
+    note: "Full rest day. No gym, no walk required. Prioritise sleep and food. Don't restrict calories — muscle repair happens today.",
+    habits: [
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  },
+  {
+    label: 'Sun', name: 'Sunday', gymDay: false,
+    note: 'Prep day. Cook chicken in bulk, sort meals for Mon–Tue. Sets you up to not skip.',
+    habits: [
+      { label: 'Breakfast eaten (eggs + carb source)', tag: 'food' },
+      { label: 'Hit 120–130g protein', tag: 'food' },
+      { label: 'Drank 2–2.5 litres of water', tag: 'food' },
+      { label: 'Multivitamin + vitamin D taken', tag: 'food' },
+      { label: 'Morning: cleanser + moisturiser', tag: 'skin' },
+      { label: 'Evening: cleanser + BP + moisturiser', tag: 'skin' },
+      { label: 'Adapalene applied (2–3× per week)', tag: 'skin' },
+      { label: 'Minoxidil applied (night)', tag: 'hair' },
+      { label: 'Prep meals for the week ahead', tag: 'food' },
+      { label: 'In bed by 21:30', tag: 'rest' }
+    ]
+  }
+];
+
+const SECTION_ORDER = [
+  { key: 'gym', label: 'Gym' },
+  { key: 'food', label: 'Nutrition' },
+  { key: 'skin', label: 'Skincare' },
+  { key: 'hair', label: 'Hair' },
+  { key: 'rest', label: 'Activity & sleep' }
+];
+
+// State
+let state = {};
+let currentDay = 0;
+
+function getWeekKey() {
+  const now = new Date();
+  const jan1 = new Date(now.getFullYear(), 0, 1);
+  const week = Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  return `w${now.getFullYear()}-${week}`;
+}
+
+function habitKey(day, idx) { return `${getWeekKey()}-d${day}-h${idx}`; }
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem('plan-state') || '{}'); } catch(e) { state = {}; }
+}
+
+function saveState() {
+  try { localStorage.setItem('plan-state', JSON.stringify(state)); } catch(e) {}
+}
+
+function getTodayIndex() {
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function getDayProgress(dayIdx) {
+  const habits = DAYS[dayIdx].habits;
+  const done = habits.filter((_, i) => state[habitKey(dayIdx, i)]).length;
+  return { done, total: habits.length };
+}
+
+function toggle(dayIdx, habitIdx) {
+  const k = habitKey(dayIdx, habitIdx);
+  state[k] = !state[k];
+  saveState();
+  render();
+  if (state[k]) pulseCheck(dayIdx, habitIdx);
+}
+
+function pulseCheck(dayIdx, habitIdx) {
+  const el = document.querySelector(`[data-habit="${dayIdx}-${habitIdx}"] .check-box`);
+  if (!el) return;
+  el.style.transform = 'scale(1.3)';
+  setTimeout(() => el.style.transform = '', 200);
+}
+
+function resetDay() {
+  DAYS[currentDay].habits.forEach((_, i) => { state[habitKey(currentDay, i)] = false; });
+  saveState();
+  render();
+}
+
+function renderStreakDots() {
+  const today = getTodayIndex();
+  const dots = DAYS.map((_, i) => {
+    const { done, total } = getDayProgress(i);
+    const complete = done === total && total > 0;
+    const past = i < today;
+    let cls = 'streak-dot';
+    if (complete) cls += ' active';
+    return `<div class="${cls}" title="${DAYS[i].name}"></div>`;
+  }).join('');
+  document.getElementById('streakDots').innerHTML = dots;
+}
+
+function renderTabs() {
+  const today = getTodayIndex();
+  document.getElementById('dayTabs').innerHTML = DAYS.map((d, i) => {
+    let cls = 'day-tab';
+    if (d.gymDay) cls += ' has-gym';
+    if (i === today) cls += ' today';
+    if (i === currentDay) cls += ' active';
+    return `<div class="${cls}" onclick="switchDay(${i})">
+      <span class="tab-label">${d.label}</span>
+      <div class="tab-dot"></div>
+    </div>`;
+  }).join('');
+}
+
+function renderProgress() {
+  const { done, total } = getDayProgress(currentDay);
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('dayName').textContent = DAYS[currentDay].name;
+  document.getElementById('progressCount').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function renderContent() {
+  const d = DAYS[currentDay];
+  let html = '';
+
+  if (d.gymDay) {
+    html += `<div class="gym-card">
+      <div class="gym-card-header">
+        <span class="gym-card-title">Gym — ${d.gymType}</span>
+        <span class="gym-badge">35 min</span>
+      </div>`;
+    d.gym.forEach(e => {
+      html += `<div class="gym-exercise">
+        <span class="gym-ex-name">${e.ex}</span>
+        <span class="gym-ex-sets">${e.sets}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  SECTION_ORDER.forEach(section => {
+    const items = d.habits.map((h, i) => ({ ...h, i })).filter(h => h.tag === section.key);
+    if (!items.length) return;
+    html += `<div class="section-label">${section.label}</div>`;
+    items.forEach(h => {
+      const done = !!state[habitKey(currentDay, h.i)];
+      html += `<div class="habit-row${done ? ' done' : ''}" data-habit="${currentDay}-${h.i}" onclick="toggle(${currentDay}, ${h.i})">
+        <div class="check-box">
+          <svg class="check-icon" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.5 5L4 7.5L8.5 2.5" stroke="#0a0a0a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="habit-label">${h.label}</span>
+        <span class="habit-tag tag-${h.tag}">${h.tag}</span>
+      </div>`;
+    });
+  });
+
+  if (d.note) {
+    html += `<div class="day-note">${d.note}</div>`;
+  }
+
+  html += '<div style="height:8px"></div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+function render() {
+  renderStreakDots();
+  renderTabs();
+  renderProgress();
+  renderContent();
+}
+
+function switchDay(i) {
+  currentDay = i;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openWeekModal() {
+  let html = '';
+  DAYS.forEach((d, i) => {
+    const { done, total } = getDayProgress(i);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    html += `<div class="week-row">
+      <span class="week-row-day">${d.name}${d.gymDay ? `<span class="week-row-gym">${d.gymType}</span>` : ''}</span>
+      <div class="week-row-bar"><div class="week-row-fill" style="width:${pct}%"></div></div>
+      <span class="week-row-pct">${pct}%</span>
+    </div>`;
+  });
+  document.getElementById('weekModalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeWeekModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+}
+
+// Init
+loadState();
+currentDay = getTodayIndex();
+render();
+
+// Service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
